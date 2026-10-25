@@ -88,7 +88,8 @@ class _ExploreTabState extends State<ExploreTab> {
                             'MenúRadar',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: AppColors.navy,
-                              fontWeight: FontWeight.w900,
+                              fontSize: 28,
+                              height: 1.1,
                             ),
                           ),
                           Text(
@@ -154,34 +155,101 @@ class _ExploreTabState extends State<ExploreTab> {
   );
 }
 
-class _AvailablePill extends StatelessWidget {
+/// Indicador de menús libres: un punto que late como un eco de radar junto al
+/// número, en la tipografía de titulares.
+class _AvailablePill extends StatefulWidget {
   const _AvailablePill({required this.count});
 
   final int count;
 
   @override
+  State<_AvailablePill> createState() => _AvailablePillState();
+}
+
+class _AvailablePillState extends State<_AvailablePill>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1800),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    padding: const EdgeInsets.fromLTRB(8, 6, 14, 6),
     decoration: BoxDecoration(
-      color: AppColors.green.withAlpha(24),
-      borderRadius: BorderRadius.circular(100),
+      color: AppColors.navy,
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(22),
+        topRight: Radius.circular(22),
+        bottomRight: Radius.circular(22),
+        bottomLeft: Radius.circular(6),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.navy.withAlpha(60),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.circle, size: 9, color: AppColors.green),
-        const SizedBox(width: 6),
+        SizedBox(
+          width: 28,
+          height: 28,
+          child: CustomPaint(painter: _EchoPainter(_pulse)),
+        ),
+        const SizedBox(width: 4),
         Text(
-          '$count libres',
-          style: const TextStyle(
-            color: AppColors.green,
-            fontWeight: FontWeight.w800,
-            fontSize: 13,
+          '${widget.count}',
+          style: AppText.display(28, color: AppColors.sun, height: 1),
+        ),
+        const SizedBox(width: 6),
+        const Text(
+          'menús\nlibres',
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 11,
+            height: 1.15,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
     ),
   );
+}
+
+class _EchoPainter extends CustomPainter {
+  _EchoPainter(this.animation) : super(repaint: animation);
+
+  final Animation<double> animation;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const dot = Color(0xFF3DDC97);
+    final center = size.center(Offset.zero);
+    final t = animation.value;
+    canvas
+      ..drawCircle(
+        center,
+        4 + t * 10,
+        Paint()
+          ..color = dot.withAlpha(((1 - t) * 180).round())
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6,
+      )
+      ..drawCircle(center, 4.5, Paint()..color = dot);
+  }
+
+  @override
+  bool shouldRepaint(covariant _EchoPainter oldDelegate) => false;
 }
 
 class _EmptyState extends StatelessWidget {

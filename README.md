@@ -8,7 +8,7 @@ Prototipo móvil multiplataforma para encontrar menús económicos y disponibles
 
 | Detalle | Publicar |
 |:---:|:---:|
-| ![Detalle](docs/capturas/04_detalle.png) | ![Publicar](docs/capturas/05_publicar.png) |
+| ![Detalle](docs/capturas/04_detalle.png) | ![Publicar](docs/capturas/05b_publicar_vista_previa.png) |
 
 ## Qué incluye
 
@@ -17,8 +17,8 @@ Prototipo móvil multiplataforma para encontrar menús económicos y disponibles
 | **Menús** | Buscar y filtrar por precio o cocina; cada tarjeta muestra precio, estado y platos de un vistazo. |
 | **Detalle** | Entrada, plato de fondo y bebida, con minutos a pie y referencia del local. |
 | **Radar** | Cada local aparece a una distancia proporcional a sus minutos a pie; al tocar un pin se ve una vista previa. |
-| **Comunidad** | Avisos recientes de otros estudiantes sobre disponibilidad. |
-| **Publicar** | Formulario validado para agregar un menú. |
+| **Comunidad** | Avisos recientes de otros estudiantes. Se publica sin cuenta: la primera vez se elige un apodo. |
+| **Publicar** | Formulario con íconos, tres secciones y vista previa en vivo del menú. |
 | **Avisar stock** | Hoja inferior para actualizar el estado de un menú. |
 
 > **Datos de demostración.** Los locales y avisos son de ejemplo. Los cambios viven en memoria mientras la app está abierta: no hay base de datos, GPS, cámara ni sincronización entre dispositivos. El radar es una visualización referencial, no un mapa.
@@ -64,6 +64,8 @@ lib/
     menu_card.dart                Tarjeta de menú
     status_badge.dart             Indicador de disponibilidad
     availability_sheet.dart       Hoja inferior para avisar stock
+    notice_composer.dart          Hoja para publicar un aviso en Comunidad
+assets/fonts/                     Lilita One y Poppins (licencia OFL)
 docs/
   analisis_y_layout.md            Árbol de problemas, diseño y widgets
   capturas/                       Capturas del emulador

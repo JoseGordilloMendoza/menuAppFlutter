@@ -14,6 +14,14 @@ extension MenuAvailabilityLabel on MenuAvailability {
   };
 }
 
+/// Minutos a pie que representa el anillo exterior del radar.
+const int radarMaxMinutes = 6;
+
+/// Fracción del radio del radar donde cae un local según sus minutos a pie.
+/// Deja un espacio libre alrededor del marcador del campus.
+double radarFraction(num minutes) =>
+    0.22 + 0.78 * minutes.clamp(1, radarMaxMinutes) / radarMaxMinutes;
+
 class CampusMenu {
   const CampusMenu({
     required this.id,

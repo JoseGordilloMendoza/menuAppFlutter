@@ -64,11 +64,7 @@ class MenuDetailPage extends StatelessWidget {
                             menu.restaurant,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: AppText.display(22, color: Colors.white),
                           ),
                         ),
                       ),
@@ -99,7 +95,7 @@ class MenuDetailPage extends StatelessWidget {
                       menu.restaurant,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: AppColors.navy,
-                        fontWeight: FontWeight.w900,
+                        fontSize: 34,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -108,11 +104,7 @@ class MenuDetailPage extends StatelessWidget {
                       children: [
                         Text(
                           'S/ ${menu.price.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: AppColors.orange,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 30,
-                          ),
+                          style: AppText.display(36, color: AppColors.orange),
                         ),
                         const SizedBox(width: 12),
                         StatusBadge(status: menu.availability),

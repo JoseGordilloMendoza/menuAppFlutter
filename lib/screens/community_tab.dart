@@ -19,7 +19,7 @@ class CommunityTab extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.only(bottom: 110),
         children: [
-          _Header(count: notices.length),
+          _Header(count: notices.length, alias: store.alias),
           const SizedBox(height: 8),
           for (var i = 0; i < notices.length; i++)
             Padding(
@@ -41,9 +41,10 @@ class CommunityTab extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.count});
+  const _Header({required this.count, required this.alias});
 
   final int count;
+  final String? alias;
 
   @override
   Widget build(BuildContext context) {
@@ -90,18 +91,13 @@ class _Header extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Comunidad',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 38,
-                    height: 1,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: AppText.display(44, color: Colors.white, height: 1),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Avisos de otros estudiantes',
+                  alias == null ? 'Avisos de otros estudiantes' : 'Publicas como $alias',
                   style: TextStyle(color: Colors.white.withAlpha(220), fontSize: 15),
                 ),
               ],
@@ -128,10 +124,7 @@ class _Header extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       '$count avisos recientes',
-                      style: const TextStyle(
-                        color: AppColors.navy,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: AppText.display(17),
                     ),
                   ],
                 ),
@@ -207,11 +200,7 @@ class _NoticeBubble extends StatelessWidget {
                         notice.restaurant,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.navy,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 17,
-                        ),
+                        style: AppText.display(20),
                       ),
                       Text(
                         '${notice.author} · ${_timeLabel(notice.createdAt)}',
@@ -273,11 +262,7 @@ class _NoticeBubble extends StatelessWidget {
             ),
             child: Text(
               notice.author.characters.first.toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-                fontSize: 20,
-              ),
+              style: AppText.display(22, color: Colors.white),
             ),
           ),
           Positioned(

@@ -1,4 +1,4 @@
-# Contexto del laboratorio MenúRadar en Flutter
+﻿# Contexto del laboratorio MenúRadar en Flutter
 
 Actualizado: 25 de octubre de 2026.
 
@@ -57,72 +57,26 @@ Fuentes técnicas oficiales:
 - https://docs.flutter.dev/ui/layout/constraints
 - https://docs.flutter.dev/reference/flutter-cli
 
-## 6. Estado de los archivos
+## 6. Estado del proyecto
 
-El código fuente y la documentación del laboratorio están en:
+El proyecto vive en `C:\Users\Admin\Documents\menuAppFlutter` y es un repositorio git (rama `main`). Se versiona **un commit por archivo**.
 
-`C:\Users\Admin\Documents\Codex\2026-10-25\empleando-un-framework-multiplataforma-flutter-react\outputs\laboratorio_menu_radar`
+- `flutter analyze` sin avisos y `flutter test` en verde.
+- Plataformas generadas: `android/` y `web/`.
+- Las interfaces se rediseñaron con ilustraciones dibujadas con `CustomPainter` (`lib/widgets/food_art.dart`): banners por cocina en las tarjetas y el detalle, radar animado con distancia en minutos y Comunidad con cabecera ondulada y burbujas asimétricas.
+- Estructura y capturas: ver `README.md` y `docs/analisis_y_layout.md`.
 
-Archivos principales:
+## 7. Entorno de desarrollo
 
-- `pubspec.yaml`: configuración del paquete Flutter.
-- `lib/main.dart`: arranque.
-- `lib/models/menu.dart`: modelos y estados de disponibilidad.
-- `lib/data/menu_store.dart`: datos de muestra y estado temporal.
-- `lib/screens/home_shell.dart`: lista de menús, radar y comunidad.
-- `lib/screens/menu_detail_page.dart`: detalle.
-- `lib/screens/publish_menu_page.dart`: formulario.
-- `lib/widgets/`: tarjeta, indicador de estado y hoja inferior.
-- `docs/analisis_y_layout.md`: explicación de árbol de problemas, pantallas y widgets.
-- `README.md`: alcance, estructura y comandos.
-
-Se verificó la existencia de los archivos y que los imports relativos apuntan a archivos presentes. **No se pudo ejecutar `flutter analyze` ni la app** porque Flutter y Dart no estaban instalados en el entorno al momento de preparar el proyecto. Tampoco se generaron aún las carpetas de plataforma `android/`, `web/` o `ios/`.
-
-## 7. Instalación y ejecución desde terminal en Windows
-
-El usuario prefiere usar PowerShell y **no necesita VS Code**. En el equipo se detectaron Git, VS Code, Android Studio y el Android SDK; Flutter no aparecía instalado. Una instalación posible por terminal es:
-
-```powershell
-$sdkParent = Join-Path $env:USERPROFILE 'develop'
-New-Item -ItemType Directory -Force -Path $sdkParent
-git clone --branch stable https://github.com/flutter/flutter.git (Join-Path $sdkParent 'flutter')
-
-$flutterBin = Join-Path $sdkParent 'flutter\bin'
-$env:Path = "$flutterBin;$env:Path"
-flutter --version
-flutter doctor -v
-```
-
-Para guardar el `Path` en la cuenta de Windows:
-
-```powershell
-$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
-if (($userPath -split ';') -notcontains $flutterBin) {
-    [Environment]::SetEnvironmentVariable('Path', "$flutterBin;$userPath", 'User')
-}
-```
-
-Después, cerrar y abrir PowerShell. Si `flutter doctor` indica licencias Android pendientes, ejecutar `flutter doctor --android-licenses` y revisar cada licencia. Para generar plataformas y probar el laboratorio:
-
-```powershell
-Set-Location -LiteralPath 'C:\Users\Admin\Documents\Codex\2026-10-25\empleando-un-framework-multiplataforma-flutter-react\outputs\laboratorio_menu_radar'
-flutter create --project-name menu_radar --platforms=android,web .
-flutter pub get
-flutter analyze
-flutter run -d chrome
-```
-
-Para Android, iniciar un emulador desde Android Studio o conectar un teléfono con depuración USB; luego usar `flutter devices` y `flutter run`. Para compilar iOS se requiere macOS.
+- **Flutter** 3.47.8 (Dart 3.13.7) en `C:\Users\Admin\flutter`, agregado al Path de usuario. Si una terminal no lo reconoce, cerrar y reabrir el IDE por completo.
+- **Emulador recomendado:** `Pixel_9_Pro_Dev` (16 GB de datos). El AVD `Pixel_9_Pro` original tiene 6 GB casi llenos con otras apps y no admite el APK de depuración.
+- Comandos: `flutter emulators --launch Pixel_9_Pro_Dev`, `flutter devices`, `flutter run -d <id>`.
+- Pendientes de `flutter doctor` que no bloquean: falta `cmdline-tools` de Android y componentes de C++ de Visual Studio (solo para escritorio Windows).
 
 ## 8. Próximos pasos
 
-1. Instalar Flutter o confirmar si ya se instaló; ejecutar `flutter doctor -v`.
-2. Generar archivos de plataforma con `flutter create --project-name menu_radar --platforms=android,web .` dentro de la carpeta del laboratorio.
-3. Ejecutar `flutter analyze`; corregir cualquier diagnóstico de la versión de Flutter instalada.
-4. Abrir y probar la app en Chrome y en Android. Verificar filtros, detalle, formulario, reporte de disponibilidad y comunidad.
-5. Revisar visualmente las pantallas en un tamaño móvil y ajustar desbordes o espacios si aparecen.
-6. Preparar el árbol de problemas formal y las capturas para la entrega académica.
-
-## 9. Nota sobre la nueva carpeta
-
-Este archivo conserva el contexto. La carpeta `C:\Users\Admin\Documents\menuAppFlutter` se pidió como ubicación separada para continuar el trabajo. El código del prototipo sigue en la ruta indicada en la sección 6 hasta que el usuario decida copiarlo o moverlo.
+1. Armar el documento formal (.docx) con: carátula, índice de contenido/imágenes/tablas, descripción general, diseño de interfaces (funcionalidades y mockups), proceso de desarrollo, apreciación (2 a favor y 2 en contra), anexos con el código y referencias.
+2. Definir los datos de la carátula: universidad, curso, docente, integrantes y fecha.
+3. Probar a mano todos los flujos: filtros, formulario con validación, avisar stock y avisos en Comunidad.
+4. Cambiar el identificador `com.example.menu_radar` por uno propio.
+5. Opcional: probar en la tablet (`Medium_Tablet`) para mostrar el manejo de layout en pantallas anchas.

@@ -46,11 +46,10 @@ class MenuCard extends StatelessWidget {
                   bottom: 12,
                   child: Text(
                     'S/ ${menu.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: AppText.display(
+                      36,
                       color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w900,
-                      shadows: [Shadow(color: Color(0x55000000), blurRadius: 8)],
+                      shadows: const [Shadow(color: Color(0x55000000), blurRadius: 8)],
                     ),
                   ),
                 ),
@@ -69,8 +68,8 @@ class MenuCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w900,
                             color: AppColors.navy,
+                            fontSize: 23,
                           ),
                         ),
                       ),
@@ -161,14 +160,9 @@ class _SoldOutVeil extends StatelessWidget {
           border: Border.all(color: Colors.white, width: 3),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: const Text(
+        child: Text(
           'AGOTADO',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 3,
-          ),
+          style: AppText.display(26, color: Colors.white, letterSpacing: 3),
         ),
       ),
     ),

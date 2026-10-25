@@ -41,7 +41,7 @@ Future<void> reportAvailability(
               ),
             const SizedBox(height: 6),
             Text(
-              'Prototipo: el cambio se guarda solo mientras la app esta abierta.',
+              'Prototipo: el cambio se guarda solo mientras la app está abierta.',
               style: Theme.of(sheetContext).textTheme.bodySmall,
             ),
           ],
@@ -52,6 +52,6 @@ Future<void> reportAvailability(
   if (selected == null || !context.mounted) return;
   store.updateAvailability(menu.id, selected);
   ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Disponibilidad actualizada en esta sesion.')),
+    const SnackBar(content: Text('Disponibilidad actualizada en esta sesión.')),
   );
 }

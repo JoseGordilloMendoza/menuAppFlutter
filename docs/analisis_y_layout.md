@@ -36,7 +36,7 @@ El árbol parte de la descripción del trabajo previo MenúRadar (PWA con React)
 
 ![Menús](capturas/01_lista.png)
 
-- **Encabezado:** `Row` con logo, título y contador de menús libres.
+- **Encabezado:** `Row` con logo, título en Lilita One y un indicador de menús libres: punto verde que late como un eco de radar junto al número, sobre una cápsula azul oscuro de esquina irregular (`CustomPainter` + `AnimationController`).
 - **Búsqueda y filtros:** `TextField` y una `ListView` horizontal de `FilterChip` con ícono.
 - **Tarjeta:** el banner con la ilustración ocupa la parte alta; el precio y el estado van sobre la imagen. Debajo: nombre, tres datos con ícono y los platos como chips tintados con el color de la cocina.
 - **Menú agotado:** la imagen se oscurece y aparece el sello "AGOTADO" (ver [captura](capturas/01c_agotado.png)).
@@ -85,11 +85,37 @@ Scaffold
 - **Burbujas:** alternan lado izquierdo y derecho. La esquina inferior del lado del avatar es casi recta, lo que da forma de globo de conversación.
 - **Imágenes:** una miniatura circular del plato (`ClipOval`) y un avatar con la inicial del autor y un ícono de estado.
 
+#### Cómo se publica un aviso
+
+Se evaluaron tres formas de identificar a quien publica:
+
+| Opción | Ventaja | Inconveniente | Decisión |
+|---|---|---|---|
+| Cuenta con correo institucional | Autores verificables | Exige servidor y registro; frena el primer aviso | Para una versión real |
+| **Apodo local, sin cuenta** | Publicar en segundos; no requiere servidor | No hay verificación | **Usada en el prototipo** |
+| Anónimo total | Cero fricción | Los avisos no tienen quién los respalde | Descartada |
+
+La primera vez que alguien publica, la hoja **Nuevo aviso** pide un apodo (2 a 16 caracteres) y lo recuerda mientras la app está abierta. Después solo pide tres datos: dónde, cómo está y un comentario opcional. El encabezado pasa a decir "Publicas como …".
+
+| Sin apodo | Con el aviso completo | Resultado |
+|:---:|:---:|:---:|
+| ![Nuevo aviso](capturas/06_nuevo_aviso.png) | ![Aviso completo](capturas/06b_nuevo_aviso_lleno.png) | ![Aviso publicado](capturas/03b_comunidad_con_aviso.png) |
+
+El botón flotante cambia a **Nuevo aviso** en esta pestaña. Publicar un aviso también actualiza el estado del menú elegido, de modo que la lista y el radar reflejan lo que reportó la comunidad.
+
 ### 3.5 Publicar
 
-![Publicar](capturas/05_publicar.png)
+| Formulario | Vista previa en vivo |
+|:---:|:---:|
+| ![Publicar](capturas/05_publicar.png) | ![Publicar con datos](capturas/05b_publicar_vista_previa.png) |
 
-Formulario con `Form` y `TextFormField` validados. El tipo de cocina usa `DropdownButtonFormField` y la disponibilidad observada un `SegmentedButton`.
+El formulario se organiza para que no parezca largo:
+- **Vista previa arriba:** un banner que muestra cómo se verá el menú. Cambia en vivo al elegir la cocina y al escribir el nombre y el precio (`ListenableBuilder` sobre los controladores).
+- **Cocina en chips:** `ChoiceChip` con ícono dentro de una `ListView` horizontal; reemplazan al menú desplegable.
+- **Tres secciones numeradas:** *El local*, *El menú de hoy* y *¿Cuánto queda?*, cada una con título en Lilita One.
+- **Un ícono por campo:** `prefixIcon` en color de marca, con ejemplos como `hintText`.
+- **Validación amable:** cada campo se valida solo cuando se interactúa con él (`AutovalidateMode.onUserInteraction` por campo). El formulario completo se valida al pulsar *Publicar menú*.
+- **Disponibilidad:** `SegmentedButton` a todo el ancho con íconos.
 
 ## 4. Widgets de organización y layout investigados
 
@@ -113,6 +139,10 @@ Formulario con `Form` y `TextFormField` validados. El tipo de cocina usa `Dropdo
 | `Transform.rotate` | Gira un widget. | Sellos y sticker |
 | `CustomPaint`, `CustomPainter` | Dibujo propio en un lienzo. | Ilustraciones y radar |
 | `AnimatedSwitcher`, `AnimatedScale` | Animaciones implícitas. | Vista previa y pines |
+| `AnimationController` | Animación continua (barrido y eco). | Radar e indicador de libres |
+| `ChoiceChip`, `FilterChip` | Elección de una opción con chips. | Cocina, filtros y local del aviso |
+| `ListenableBuilder` | Reconstruye al cambiar un controlador. | Vista previa del formulario |
+| `showModalBottomSheet` | Hoja inferior modal. | Avisar stock y Nuevo aviso |
 
 **Reglas de layout aplicadas**
 - Las listas reciben altura acotada con `Expanded`.
@@ -120,11 +150,22 @@ Formulario con `Form` y `TextFormField` validados. El tipo de cocina usa `Dropdo
 - El radar usa medidas relativas al espacio disponible, no coordenadas fijas.
 - El contenido deja 100 px libres al final para que el botón flotante no tape el último elemento.
 
-## 5. Ilustraciones sin imágenes externas
+## 5. Tipografía
+
+Dos familias incluidas en `assets/fonts/`, ambas con licencia SIL Open Font License, de modo que la app no depende de internet:
+
+| Familia | Uso | Por qué |
+|---|---|---|
+| **Lilita One** | Títulos, precios, nombres de local y sellos | Trazo grueso y redondeado que recuerda a un letrero de comida; da identidad con pocas palabras. Tiene un solo peso, así que nunca se le aplica negrita. |
+| **Poppins** (Regular, Medium, SemiBold, Bold) | Texto de lectura, etiquetas y botones | Geométrica y muy legible en pantallas pequeñas. |
+
+En el código, `ThemeData(fontFamily: 'Poppins')` fija la base y `AppText.display()` entrega el estilo de titular. Los estilos de títulos del tema (`headlineMedium`, `headlineSmall`, `titleLarge`) ya usan Lilita One.
+
+## 6. Ilustraciones sin imágenes externas
 
 Los platos se dibujan con `CustomPainter` en un lienzo normalizado de 0 a 1 (`lib/widgets/food_art.dart`). Hay una ilustración por cocina: plato criollo, bowl vegetariano, bowl de chifa y una cloche genérica. Ventajas: no pesan, escalan sin perder calidad y no dependen de licencias. Se pueden reemplazar por fotos reales con `Image.asset` sin cambiar el resto del diseño.
 
-## 6. Flujo de navegación
+## 7. Flujo de navegación
 
 ```mermaid
 flowchart LR
@@ -136,14 +177,18 @@ flowchart LR
     P --> M
     P -.nuevo aviso.-> C[Comunidad]
     A -.nuevo aviso.-> C
+    C --> N["Nuevo aviso<br/>(apodo la primera vez)"]
+    N -.actualiza estado.-> M
 ```
 
-## 7. Fuentes técnicas
+## 8. Fuentes técnicas
 
 - Flutter, [Layouts in Flutter](https://docs.flutter.dev/ui/layout).
 - Flutter, [Layout widgets](https://docs.flutter.dev/ui/widgets/layout).
 - Flutter, [Understanding constraints](https://docs.flutter.dev/ui/layout/constraints).
 - Flutter, [Material components](https://docs.flutter.dev/ui/widgets/material).
 - Flutter, [CustomPaint](https://api.flutter.dev/flutter/widgets/CustomPaint-class.html) y [Hero animations](https://docs.flutter.dev/ui/animations/hero-animations).
+- Flutter, [Use a custom font](https://docs.flutter.dev/cookbook/design/fonts) y [Forms](https://docs.flutter.dev/cookbook/forms/validation).
+- Google Fonts, [Lilita One](https://fonts.google.com/specimen/Lilita+One) y [Poppins](https://fonts.google.com/specimen/Poppins) (SIL Open Font License 1.1).
 
 Documento temático de referencia: *MenúRadar: Aplicativo Móvil Universitario para la Gestión en Tiempo Real de Menús Estudiantiles* (PDF previo del equipo).

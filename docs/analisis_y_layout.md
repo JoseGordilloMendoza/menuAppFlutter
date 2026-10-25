@@ -1,4 +1,4 @@
-# Análisis del problema, diseño de interfaces y layout
+﻿# Análisis del problema, diseño de interfaces y layout
 
 ## 1. Árbol de problemas
 
@@ -166,6 +166,10 @@ En el código, `ThemeData(fontFamily: 'Poppins')` fija la base y `AppText.displa
 Los platos se dibujan con `CustomPainter` en un lienzo normalizado de 0 a 1 (`lib/widgets/food_art.dart`). Hay una ilustración por cocina: plato criollo, bowl vegetariano, bowl de chifa y una cloche genérica. Ventajas: no pesan, escalan sin perder calidad y no dependen de licencias. Se pueden reemplazar por fotos reales con `Image.asset` sin cambiar el resto del diseño.
 
 ## 7. Flujo de navegación
+
+![Flujo general de la aplicación](figuras/flujo_general.png)
+
+El mismo flujo en forma de diagrama editable:
 
 ```mermaid
 flowchart LR

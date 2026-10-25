@@ -81,6 +81,19 @@ class MenuStore extends ChangeNotifier {
     ),
   ];
 
+  /// Apodo de quien publica. No hay cuentas: se elige la primera vez que se
+  /// publica un aviso y dura mientras la app está abierta.
+  String? _alias;
+
+  String? get alias => _alias;
+
+  String get _author => _alias ?? 'Anónimo';
+
+  void setAlias(String value) {
+    _alias = value.trim();
+    notifyListeners();
+  }
+
   List<CampusMenu> get menus => List.unmodifiable(_menus);
   List<CommunityNotice> get notices => List.unmodifiable(_notices);
   int get availableCount => _menus
@@ -89,18 +102,26 @@ class MenuStore extends ChangeNotifier {
 
   CampusMenu findMenu(String id) => _menus.firstWhere((menu) => menu.id == id);
 
-  void updateAvailability(String id, MenuAvailability availability) {
+  /// Actualiza el estado de un menú y publica un aviso. Si [comment] viene
+  /// vacío se usa el texto estándar del estado.
+  void updateAvailability(
+    String id,
+    MenuAvailability availability, {
+    String? comment,
+  }) {
     final index = _menus.indexWhere((menu) => menu.id == id);
-    if (index < 0 || _menus[index].availability == availability) return;
+    final text = comment?.trim() ?? '';
+    if (index < 0) return;
+    if (_menus[index].availability == availability && text.isEmpty) return;
     final current = _menus[index];
     _menus[index] = current.copyWith(availability: availability);
     _notices.insert(
       0,
       CommunityNotice(
-        author: 'Tú',
+        author: _author,
         restaurant: current.restaurant,
         category: current.category,
-        message: availability.noticeText,
+        message: text.isEmpty ? availability.noticeText : text,
         availability: availability,
         createdAt: DateTime.now(),
       ),
@@ -113,7 +134,7 @@ class MenuStore extends ChangeNotifier {
     _notices.insert(
       0,
       CommunityNotice(
-        author: 'Tú',
+        author: _author,
         restaurant: menu.restaurant,
         category: menu.category,
         message: 'Publicó un menú por S/ ${menu.price.toStringAsFixed(2)}.',

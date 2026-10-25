@@ -65,13 +65,17 @@ class MenuStore extends ChangeNotifier {
   final List<CommunityNotice> _notices = [
     CommunityNotice(
       author: 'Valeria R.',
-      message: 'En Sazón de Casa quedan pocas raciones.',
+      restaurant: 'Sazón de Casa',
+      category: 'Vegetariano',
+      message: 'Quedan pocas raciones.',
       availability: MenuAvailability.limited,
       createdAt: DateTime.now().subtract(const Duration(minutes: 12)),
     ),
     CommunityNotice(
       author: 'Carlos M.',
-      message: 'El menú de El Buen Sabor se agotó por hoy.',
+      restaurant: 'El Buen Sabor',
+      category: 'Criollo',
+      message: 'Se agotó por hoy.',
       availability: MenuAvailability.soldOut,
       createdAt: DateTime.now().subtract(const Duration(minutes: 25)),
     ),
@@ -88,13 +92,15 @@ class MenuStore extends ChangeNotifier {
   void updateAvailability(String id, MenuAvailability availability) {
     final index = _menus.indexWhere((menu) => menu.id == id);
     if (index < 0 || _menus[index].availability == availability) return;
-    final restaurant = _menus[index].restaurant;
-    _menus[index] = _menus[index].copyWith(availability: availability);
+    final current = _menus[index];
+    _menus[index] = current.copyWith(availability: availability);
     _notices.insert(
       0,
       CommunityNotice(
-        author: 'Reporte de la comunidad',
-        message: '$restaurant: ${availability.label.toLowerCase()}.',
+        author: 'Tú',
+        restaurant: current.restaurant,
+        category: current.category,
+        message: availability.noticeText,
         availability: availability,
         createdAt: DateTime.now(),
       ),
@@ -107,8 +113,10 @@ class MenuStore extends ChangeNotifier {
     _notices.insert(
       0,
       CommunityNotice(
-        author: 'Nuevo reporte',
-        message: '${menu.restaurant} publico un menu por S/ ${menu.price.toStringAsFixed(2)}.',
+        author: 'Tú',
+        restaurant: menu.restaurant,
+        category: menu.category,
+        message: 'Publicó un menú por S/ ${menu.price.toStringAsFixed(2)}.',
         availability: menu.availability,
         createdAt: DateTime.now(),
       ),

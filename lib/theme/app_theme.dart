@@ -7,6 +7,8 @@ class AppColors {
   static const green = Color(0xFF087C63);
   static const amber = Color(0xFF9A5D00);
   static const red = Color(0xFFB33434);
+  static const sun = Color(0xFFFFC145);
+  static const ember = Color(0xFFB8360A);
 }
 
 ThemeData buildAppTheme() {

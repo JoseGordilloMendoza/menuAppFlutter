@@ -8,16 +8,8 @@ import '../theme/app_theme.dart';
 import '../widgets/food_art.dart';
 import '../widgets/status_badge.dart';
 
-/// Minutos a pie que representa el anillo exterior.
-const int _maxMinutes = 6;
-
 double _radarRadius(Size size) =>
     math.max(40, math.min(size.width, size.height) / 2 - 36);
-
-/// Fracción del radio donde cae un local según sus minutos a pie. Deja un
-/// espacio libre alrededor del marcador del campus.
-double _ringFraction(num minutes) =>
-    0.22 + 0.78 * minutes.clamp(1, _maxMinutes) / _maxMinutes;
 
 /// La distancia al centro equivale a los minutos a pie; el ángulo sale de la
 /// posición ilustrativa del menú.
@@ -25,7 +17,7 @@ Offset _pinCenter(CampusMenu menu, Size size) {
   final angle = math.atan2(menu.positionY - 0.5, menu.positionX - 0.5);
   return size.center(Offset.zero) +
       Offset(math.cos(angle), math.sin(angle)) *
-          (_ringFraction(menu.walkMinutes) * _radarRadius(size));
+          (radarFraction(menu.walkMinutes) * _radarRadius(size));
 }
 
 class RadarTab extends StatefulWidget {
@@ -198,8 +190,8 @@ class _RadarPainter extends CustomPainter {
     canvas
       ..drawLine(Offset(center.dx, center.dy - radius - 14), Offset(center.dx, center.dy + radius + 14), line)
       ..drawLine(Offset(center.dx - radius - 14, center.dy), Offset(center.dx + radius + 14, center.dy), line);
-    for (final minutes in const [2, 4, _maxMinutes]) {
-      final r = radius * _ringFraction(minutes);
+    for (final minutes in const [2, 4, radarMaxMinutes]) {
+      final r = radius * radarFraction(minutes);
       canvas.drawCircle(center, r, line);
       _label(canvas, '$minutes min', Offset(center.dx + 6, center.dy - r + 3));
     }

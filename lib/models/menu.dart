@@ -6,6 +6,12 @@ extension MenuAvailabilityLabel on MenuAvailability {
     MenuAvailability.limited => 'Últimas raciones',
     MenuAvailability.soldOut => 'Agotado',
   };
+
+  String get noticeText => switch (this) {
+    MenuAvailability.available => 'Hay raciones disponibles.',
+    MenuAvailability.limited => 'Quedan pocas raciones.',
+    MenuAvailability.soldOut => 'Se agotó por ahora.',
+  };
 }
 
 class CampusMenu {
@@ -56,12 +62,16 @@ class CampusMenu {
 class CommunityNotice {
   const CommunityNotice({
     required this.author,
+    required this.restaurant,
+    required this.category,
     required this.message,
     required this.availability,
     required this.createdAt,
   });
 
   final String author;
+  final String restaurant;
+  final String category;
   final String message;
   final MenuAvailability availability;
   final DateTime createdAt;

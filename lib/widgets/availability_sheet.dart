@@ -22,9 +22,7 @@ Future<void> reportAvailability(
           children: [
             Text(
               'Disponibilidad de ${menu.restaurant}',
-              style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(sheetContext).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             const Text('Selecciona el estado que observaste en el local.'),

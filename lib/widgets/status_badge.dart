@@ -16,9 +16,12 @@ IconData availabilityIcon(MenuAvailability status) => switch (status) {
 };
 
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({super.key, required this.status});
+  const StatusBadge({super.key, required this.status, this.solid = false});
 
   final MenuAvailability status;
+
+  /// Fondo blanco con sombra, para colocarlo sobre imágenes.
+  final bool solid;
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +29,11 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withAlpha(22),
+        color: solid ? Colors.white : color.withAlpha(22),
         borderRadius: BorderRadius.circular(100),
+        boxShadow: solid
+            ? const [BoxShadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2))]
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

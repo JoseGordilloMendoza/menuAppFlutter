@@ -1,58 +1,75 @@
-# Laboratorio: MenúRadar en Flutter
+# MenúRadar · Laboratorio de Flutter
 
-Prototipo móvil multiplataforma para consultar menús económicos cerca del campus, comparar precios y avisar si quedan raciones. La temática procede del trabajo previo **MenúRadar**; esta entrega se concentra en interfaces construidas con widgets de Flutter y en el análisis del layout.
+Prototipo móvil multiplataforma para encontrar menús económicos y disponibles cerca del campus antes de salir al receso. Las interfaces están construidas solo con widgets de Flutter y sin paquetes externos, con énfasis en **Android**.
 
-## Alcance implementado
+| Menús | Radar | Comunidad |
+|:---:|:---:|:---:|
+| ![Menús](docs/capturas/01_lista.png) | ![Radar](docs/capturas/02b_radar_seleccion.png) | ![Comunidad](docs/capturas/03_comunidad.png) |
 
-- **Menús:** búsqueda por local o plato, filtros por precio y tipo de cocina, tarjetas con precio, distancia y disponibilidad.
-- **Detalle:** entradas, platos, bebida y estado del menú.
-- **Radar:** vista visual referencial construida con `Stack`, `LayoutBuilder` y `CustomPaint`; al tocar un pin abre el detalle.
-- **Comunidad:** avisos ordenados cronológicamente.
-- **Publicar:** formulario validado para añadir un menú a la sesión.
-- **Avisar stock:** hoja inferior para actualizar el estado y generar un aviso comunitario.
+| Detalle | Publicar |
+|:---:|:---:|
+| ![Detalle](docs/capturas/04_detalle.png) | ![Publicar](docs/capturas/05_publicar.png) |
 
-Los restaurantes y avisos iniciales son **datos de demostración**. Las publicaciones y cambios se mantienen en memoria durante la sesión; no hay sincronización entre dispositivos, cámara ni GPS real. El radar muestra posiciones ilustrativas y no debe interpretarse como un mapa geográfico.
+## Qué incluye
+
+| Pantalla | Qué resuelve |
+|---|---|
+| **Menús** | Buscar y filtrar por precio o cocina; cada tarjeta muestra precio, estado y platos de un vistazo. |
+| **Detalle** | Entrada, plato de fondo y bebida, con minutos a pie y referencia del local. |
+| **Radar** | Cada local aparece a una distancia proporcional a sus minutos a pie; al tocar un pin se ve una vista previa. |
+| **Comunidad** | Avisos recientes de otros estudiantes sobre disponibilidad. |
+| **Publicar** | Formulario validado para agregar un menú. |
+| **Avisar stock** | Hoja inferior para actualizar el estado de un menú. |
+
+> **Datos de demostración.** Los locales y avisos son de ejemplo. Los cambios viven en memoria mientras la app está abierta: no hay base de datos, GPS, cámara ni sincronización entre dispositivos. El radar es una visualización referencial, no un mapa.
 
 ## Ejecutar
 
-Se requiere el SDK de Flutter y un emulador o dispositivo configurado. En la carpeta de este laboratorio:
+Requisitos: Flutter 3.47 o superior y un emulador Android (o Chrome para una prueba rápida).
 
 ```powershell
-flutter create --project-name menu_radar --platforms=android,web .
 flutter pub get
+flutter emulators --launch Pixel_9_Pro_Dev   # o el emulador que tengas
 flutter run
 ```
 
-Para generar la plataforma iOS, ejecutar en macOS:
+- `flutter run -d chrome` abre la app en el navegador, sin emulador.
+- Durante `flutter run`, `r` recarga el código y `R` reinicia la app.
+- El emulador necesita al menos 4 GB libres en su partición de datos para instalar el APK de depuración.
 
-```bash
-flutter create --project-name menu_radar --platforms=ios .
-flutter run
+Comprobaciones:
+
+```powershell
+flutter analyze
+flutter test
 ```
-
-El código fuente ya está en `lib/`. `flutter create` genera los archivos de plataforma que requiere cada equipo. El proyecto no usa paquetes externos en tiempo de ejecución.
-
-Si todavía no hay un emulador o teléfono Android conectado, se puede comprobar primero en Chrome con `flutter run -d chrome`.
 
 ## Organización
 
 ```text
 lib/
-  main.dart                     Tema y arranque
-  models/menu.dart              Datos y estados
-  data/menu_store.dart          Estado temporal del prototipo
-  screens/home_shell.dart       Menús, radar y comunidad
-  screens/menu_detail_page.dart Detalle
-  screens/publish_menu_page.dart Formulario
-  widgets/                    Tarjeta, estado y hoja inferior
-docs/analisis_y_layout.md      Árbol de problemas y componentes Flutter
+  main.dart                       Arranque y tema
+  theme/app_theme.dart            Colores y ThemeData
+  models/menu.dart                Menú, estados y avisos
+  data/menu_store.dart            Estado temporal (ChangeNotifier)
+  screens/
+    home_shell.dart               Scaffold, NavigationBar y botón flotante
+    explore_tab.dart              Menús: búsqueda, filtros y lista
+    radar_tab.dart                Radar animado con pines y vista previa
+    community_tab.dart            Comunidad: cabecera y burbujas
+    menu_detail_page.dart         Detalle con SliverAppBar
+    publish_menu_page.dart        Formulario
+  widgets/
+    food_art.dart                 Ilustraciones de platos y banner por cocina
+    menu_card.dart                Tarjeta de menú
+    status_badge.dart             Indicador de disponibilidad
+    availability_sheet.dart       Hoja inferior para avisar stock
+docs/
+  analisis_y_layout.md            Árbol de problemas, diseño y widgets
+  capturas/                       Capturas del emulador
 ```
 
-## Validación pendiente en un equipo con Flutter
+## Documentación
 
-```powershell
-flutter analyze
-flutter run
-```
-
-El SDK de Flutter no está instalado en el entorno donde se preparó esta carpeta; por ello no se ejecutaron esas comprobaciones aquí.
+- [Árbol de problemas, diseño de interfaces y widgets de layout](docs/analisis_y_layout.md)
+- [Contexto del laboratorio](CONTEXTO_MENU_RADAR.md)

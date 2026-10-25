@@ -1,8 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../data/menu_store.dart';
 import '../models/menu.dart';
 import '../theme/app_theme.dart';
+import '../widgets/food_art.dart';
+import '../widgets/status_badge.dart';
 
 class PublishMenuPage extends StatefulWidget {
   const PublishMenuPage({super.key, required this.store});
@@ -14,6 +18,8 @@ class PublishMenuPage extends StatefulWidget {
 }
 
 class _PublishMenuPageState extends State<PublishMenuPage> {
+  static const _categories = ['Criollo', 'Vegetariano', 'Chifa', 'Otro'];
+
   final _formKey = GlobalKey<FormState>();
   final _restaurant = TextEditingController();
   final _price = TextEditingController();
@@ -44,6 +50,9 @@ class _PublishMenuPageState extends State<PublishMenuPage> {
     final price = double.parse(_price.text.trim().replaceAll(',', '.'));
     final walk = int.parse(_walk.text.trim());
     final id = DateTime.now().microsecondsSinceEpoch.toString();
+    // Cada menú nuevo recibe un ángulo distinto para que los pines del radar
+    // no se encimen.
+    final angle = widget.store.menus.length * 2.4;
     widget.store.addMenu(
       CampusMenu(
         id: id,
@@ -56,12 +65,40 @@ class _PublishMenuPageState extends State<PublishMenuPage> {
         mainDishes: [_dish.text.trim()],
         drink: _drink.text.trim(),
         availability: _availability,
-        positionX: 0.45,
-        positionY: 0.72,
+        positionX: 0.5 + 0.35 * math.cos(angle),
+        positionY: 0.5 + 0.35 * math.sin(angle),
       ),
     );
     Navigator.pop(context, id);
   }
+
+  Widget _field({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hint,
+    String? prefixText,
+    String? suffixText,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+    bool last = false,
+  }) => TextFormField(
+    controller: controller,
+    keyboardType: keyboardType,
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+    textInputAction: last ? TextInputAction.done : TextInputAction.next,
+    textCapitalization: keyboardType == null
+        ? TextCapitalization.sentences
+        : TextCapitalization.none,
+    decoration: InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: Icon(icon),
+      prefixText: prefixText,
+      suffixText: suffixText,
+    ),
+    validator: validator ?? _required,
+  );
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -70,107 +107,146 @@ class _PublishMenuPageState extends State<PublishMenuPage> {
       child: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
           children: [
-            Text(
-              'Comparte un menú',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: AppColors.navy,
+            _Preview(
+              category: _category,
+              restaurant: _restaurant,
+              price: _price,
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 44,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _categories.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final category = _categories[index];
+                  return ChoiceChip(
+                    avatar: Icon(categoryIcon(category), size: 18),
+                    label: Text(category),
+                    showCheckmark: false,
+                    selected: _category == category,
+                    onSelected: (_) => setState(() => _category = category),
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 4),
-            const Text('Ayuda a otros estudiantes a elegir antes de salir del campus.'),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _restaurant,
-              decoration: const InputDecoration(labelText: 'Restaurante o huarique'),
-              validator: _required,
-            ),
-            const SizedBox(height: 12),
-            Row(
+            const SizedBox(height: 24),
+            _Section(
+              number: 1,
+              title: 'El local',
               children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _price,
-                    decoration: const InputDecoration(labelText: 'Precio S/'),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) {
-                      final parsed = double.tryParse((value ?? '').trim().replaceAll(',', '.'));
-                      return parsed == null || parsed <= 0
-                          ? 'Ingresa un precio válido.'
-                          : null;
-                    },
-                  ),
+                _field(
+                  controller: _restaurant,
+                  label: 'Nombre del local',
+                  hint: 'Ej. La Tía Rosa',
+                  icon: Icons.storefront_rounded,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _walk,
-                    decoration: const InputDecoration(labelText: 'Minutos a pie'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      final parsed = int.tryParse((value ?? '').trim());
-                      return parsed == null || parsed < 1 || parsed > 60
-                          ? 'Usa entre 1 y 60.'
-                          : null;
-                    },
-                  ),
+                _field(
+                  controller: _area,
+                  label: 'Referencia cercana',
+                  hint: 'Ej. Puerta 3',
+                  icon: Icons.place_outlined,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _field(
+                        controller: _walk,
+                        label: 'A pie',
+                        icon: Icons.directions_walk_rounded,
+                        suffixText: 'min',
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          final parsed = int.tryParse((value ?? '').trim());
+                          return parsed == null || parsed < 1 || parsed > 60
+                              ? '1 a 60.'
+                              : null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _field(
+                        controller: _price,
+                        label: 'Precio',
+                        icon: Icons.payments_outlined,
+                        prefixText: 'S/ ',
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        validator: (value) {
+                          final parsed = double.tryParse(
+                            (value ?? '').trim().replaceAll(',', '.'),
+                          );
+                          return parsed == null || parsed <= 0 ? 'Precio inválido.' : null;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _area,
-              decoration: const InputDecoration(labelText: 'Referencia cercana'),
-              validator: _required,
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              initialValue: _category,
-              decoration: const InputDecoration(labelText: 'Tipo de cocina'),
-              items: ['Criollo', 'Vegetariano', 'Chifa', 'Otro']
-                  .map((category) => DropdownMenuItem(
-                        value: category,
-                        child: Text(category),
-                      ))
-                  .toList(),
-              onChanged: (value) => setState(() => _category = value ?? 'Criollo'),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _starter,
-              decoration: const InputDecoration(labelText: 'Entrada'),
-              validator: _required,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _dish,
-              decoration: const InputDecoration(labelText: 'Plato de fondo'),
-              validator: _required,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _drink,
-              decoration: const InputDecoration(labelText: 'Bebida'),
-              validator: _required,
-            ),
-            const SizedBox(height: 20),
-            Text('Disponibilidad observada', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            SegmentedButton<MenuAvailability>(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: MenuAvailability.available, label: Text('Disponible')),
-                ButtonSegment(value: MenuAvailability.limited, label: Text('Pocas')),
-                ButtonSegment(value: MenuAvailability.soldOut, label: Text('Agotado')),
+            const SizedBox(height: 22),
+            _Section(
+              number: 2,
+              title: 'El menú de hoy',
+              children: [
+                _field(
+                  controller: _starter,
+                  label: 'Entrada',
+                  hint: 'Ej. Sopa del día',
+                  icon: Icons.soup_kitchen_rounded,
+                ),
+                _field(
+                  controller: _dish,
+                  label: 'Plato de fondo',
+                  hint: 'Ej. Lomo saltado',
+                  icon: Icons.restaurant_rounded,
+                ),
+                _field(
+                  controller: _drink,
+                  label: 'Bebida',
+                  hint: 'Ej. Chicha morada',
+                  icon: Icons.local_drink_rounded,
+                  last: true,
+                ),
               ],
-              selected: {_availability},
-              onSelectionChanged: (values) => setState(() => _availability = values.first),
             ),
-            const SizedBox(height: 18),
-            const Text(
-              'Prototipo académico: los datos publicados no se sincronizan con otros dispositivos.',
+            const SizedBox(height: 22),
+            _Section(
+              number: 3,
+              title: '¿Cuánto queda?',
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: SegmentedButton<MenuAvailability>(
+                        showSelectedIcon: false,
+                        style: SegmentedButton.styleFrom(
+                          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                        segments: [
+                          for (final (status, label) in const [
+                            (MenuAvailability.available, 'Hay'),
+                            (MenuAvailability.limited, 'Pocas'),
+                            (MenuAvailability.soldOut, 'Agotado'),
+                          ])
+                            ButtonSegment(
+                              value: status,
+                              icon: Icon(availabilityIcon(status), size: 18),
+                              label: Text(label),
+                            ),
+                        ],
+                        selected: {_availability},
+                        onSelectionChanged: (values) =>
+                            setState(() => _availability = values.first),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 22),
             FilledButton.icon(
@@ -178,9 +254,114 @@ class _PublishMenuPageState extends State<PublishMenuPage> {
               icon: const Icon(Icons.publish_rounded),
               label: const Text('Publicar menú'),
             ),
+            const SizedBox(height: 10),
+            Text(
+              'Se guarda solo mientras la app está abierta.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ),
     ),
+  );
+}
+
+/// Vista previa en vivo del banner que verán los demás estudiantes.
+class _Preview extends StatelessWidget {
+  const _Preview({
+    required this.category,
+    required this.restaurant,
+    required this.price,
+  });
+
+  final String category;
+  final TextEditingController restaurant;
+  final TextEditingController price;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 150,
+    child: FoodBanner(
+      category: category,
+      radius: BorderRadius.circular(28),
+      child: ListenableBuilder(
+        listenable: Listenable.merge([restaurant, price]),
+        builder: (context, _) {
+          final name = restaurant.text.trim();
+          final value = price.text.trim();
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Así se verá',
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(200),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  value.isEmpty ? 'S/ --' : 'S/ $value',
+                  style: AppText.display(34, color: Colors.white),
+                ),
+                SizedBox(
+                  width: 190,
+                  child: Text(
+                    name.isEmpty ? 'Tu local' : name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.display(18, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ),
+  );
+}
+
+class _Section extends StatelessWidget {
+  const _Section({
+    required this.number,
+    required this.title,
+    required this.children,
+  });
+
+  final int number;
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: AppColors.orange,
+              shape: BoxShape.circle,
+            ),
+            child: Text('$number', style: AppText.display(16, color: Colors.white)),
+          ),
+          const SizedBox(width: 10),
+          Text(title, style: AppText.display(22)),
+        ],
+      ),
+      const SizedBox(height: 14),
+      for (var i = 0; i < children.length; i++) ...[
+        if (i > 0) const SizedBox(height: 12),
+        children[i],
+      ],
+    ],
   );
 }

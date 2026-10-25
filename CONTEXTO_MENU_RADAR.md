@@ -64,7 +64,20 @@ El proyecto vive en `C:\Users\Admin\Documents\menuAppFlutter` y es un repositori
 - `flutter analyze` sin avisos y `flutter test` en verde.
 - Plataformas generadas: `android/` y `web/`.
 - Las interfaces se rediseñaron con ilustraciones dibujadas con `CustomPainter` (`lib/widgets/food_art.dart`): banners por cocina en las tarjetas y el detalle, radar animado con distancia en minutos y Comunidad con cabecera ondulada y burbujas asimétricas.
+- Tipografía propia incluida en `assets/fonts/`: Lilita One (titulares y precios) y Poppins (texto).
+- Comunidad se publica **sin cuenta**: la primera vez se pide un apodo que dura la sesión (hoja `notice_composer.dart`). Una versión real usaría el correo institucional.
+- El formulario de publicar tiene íconos por campo, secciones numeradas y una vista previa en vivo.
 - Estructura y capturas: ver `README.md` y `docs/analisis_y_layout.md`.
+
+## Datos de la carátula del documento
+
+- UNIVERSIDAD NACIONAL DE SAN AGUSTÍN DE AREQUIPA
+- FACULTAD DE INGENIERÍA DE PRODUCCIÓN Y SERVICIOS
+- ESCUELA PROFESIONAL DE INGENIERÍA DE SISTEMAS
+- LAB 4 Framework Multiplataforma
+- Integrantes: Jorge Luis Escobedo Ocaña, Jose Alonzo Gordillo Mendoza
+- Docente: Norman Patrick Harvey Arce
+- Arequipa, Octubre de 2026
 
 ## 7. Entorno de desarrollo
 
@@ -76,7 +89,7 @@ El proyecto vive en `C:\Users\Admin\Documents\menuAppFlutter` y es un repositori
 ## 8. Próximos pasos
 
 1. Armar el documento formal (.docx) con: carátula, índice de contenido/imágenes/tablas, descripción general, diseño de interfaces (funcionalidades y mockups), proceso de desarrollo, apreciación (2 a favor y 2 en contra), anexos con el código y referencias.
-2. Definir los datos de la carátula: universidad, curso, docente, integrantes y fecha.
+2. Carátula: datos ya definidos (ver arriba).
 3. Probar a mano todos los flujos: filtros, formulario con validación, avisar stock y avisos en Comunidad.
 4. Cambiar el identificador `com.example.menu_radar` por uno propio.
 5. Opcional: probar en la tablet (`Medium_Tablet`) para mostrar el manejo de layout en pantallas anchas.

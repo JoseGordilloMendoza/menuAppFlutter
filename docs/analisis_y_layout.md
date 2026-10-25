@@ -1,61 +1,149 @@
-# Análisis del problema y del layout
+# Análisis del problema, diseño de interfaces y layout
 
-## 1. Problema abordado
+## 1. Árbol de problemas
 
-**Problema central:** los estudiantes pierden parte del receso buscando presencialmente un menú económico que aún esté disponible cerca del campus.
-
-Este árbol se formula a partir de la descripción del problema del trabajo previo MenúRadar. Las cifras allí expuestas se tratan como estimaciones del documento, no como resultados medidos por este prototipo.
+```mermaid
+flowchart BT
+    C1["Precios y platos dispersos<br/>en pizarras físicas"] --> P
+    C2["Disponibilidad que cambia<br/>sin aviso"] --> P
+    C3["Difícil comparar locales<br/>antes de salir"] --> P
+    P(["Los estudiantes pierden parte del receso<br/>buscando un menú económico y disponible"])
+    P --> E1["Caminatas innecesarias"]
+    P --> E2["Frustración ante platos agotados"]
+    P --> E3["Menos tiempo para comer y descansar"]
+```
 
 | Causas | Problema central | Efectos |
 |---|---|---|
-| Información de platos y precios dispersa en pizarras físicas; disponibilidad cambiante sin aviso; poca posibilidad de comparar antes de salir. | Tiempo perdido al buscar un menú cercano, económico y disponible. | Caminatas innecesarias; frustración al encontrar platos agotados; menos tiempo para comer y descansar. |
+| Información dispersa en pizarras físicas. Disponibilidad cambiante sin aviso. Poca posibilidad de comparar antes de salir. | Tiempo perdido al buscar un menú cercano, económico y disponible. | Caminatas innecesarias. Frustración al encontrar platos agotados. Menos tiempo para comer y descansar. |
+
+El árbol parte de la descripción del trabajo previo MenúRadar (PWA con React). Las cifras de ahorro de tiempo de ese documento no se midieron en este prototipo.
 
 ## 2. Del problema a la interfaz
 
-| Necesidad derivada | Funcionalidad | Interfaz | Widgets principales |
+| Causa que ataca | Funcionalidad | Pantalla | Widgets principales |
 |---|---|---|---|
-| Comparar opciones sin recorrer locales | Buscar y filtrar menús | Menús | `TextField`, `FilterChip`, `ListView`, `Card` |
-| Conocer los detalles antes de elegir | Consultar platos, precio y referencia | Detalle | `Scaffold`, `ListView`, `Wrap`, `Card` |
-| Evitar desplazarse a un local agotado | Ver y reportar disponibilidad | Tarjeta, detalle y hoja inferior | `Row`, `StatusBadge`, `showModalBottomSheet`, `ListTile` |
-| Incorporar información nueva | Publicar un menú | Formulario | `Form`, `TextFormField`, `DropdownButtonFormField`, `SegmentedButton` |
-| Consultar avisos recientes | Leer reportes de la comunidad | Comunidad | `ListView`, `Card`, `Column` |
-| Explorar locales visualmente | Seleccionar pines referenciales | Radar | `LayoutBuilder`, `Stack`, `Positioned`, `CustomPaint` |
+| Información dispersa | Buscar y filtrar menús | Menús | `TextField`, `FilterChip`, `ListView`, `Card` |
+| Información dispersa | Consultar platos, precio y referencia | Detalle | `CustomScrollView`, `SliverAppBar`, `Card` |
+| Disponibilidad sin aviso | Ver y reportar disponibilidad | Tarjeta, detalle, hoja inferior | `StatusBadge`, `showModalBottomSheet`, `ListTile` |
+| Disponibilidad sin aviso | Leer avisos recientes | Comunidad | `ListView`, `ClipPath`, `Transform.rotate` |
+| Difícil comparar | Ver qué tan lejos está cada local | Radar | `LayoutBuilder`, `Stack`, `Positioned`, `CustomPaint` |
+| Información dispersa | Publicar un menú | Publicar | `Form`, `TextFormField`, `DropdownButtonFormField`, `SegmentedButton` |
 
-## 3. Componentes de organización y layout investigados
+## 3. Diseño de cada pantalla
 
-| Widget | Función en Flutter | Uso en el proyecto |
-|---|---|---|
-| `MaterialApp` | Define la aplicación, navegación y tema Material. | Raíz del proyecto. |
-| `Scaffold` | Estructura una pantalla con cuerpo, barra y navegación. | Pantalla principal, detalle y publicación. |
-| `SafeArea` | Evita que el contenido invada recortes y barras del sistema. | Cuerpo y acciones inferiores. |
-| `Column` | Ordena elementos verticalmente. | Encabezados, formularios y tarjetas. |
-| `Row` | Ordena elementos horizontalmente. | Precio junto al nombre, acciones y metadatos. |
-| `Expanded` | Distribuye el espacio disponible dentro de `Row` o `Column`. | Lista principal y panel del radar. |
-| `Padding` y `SizedBox` | Controlan separación y espacios constantes. | Márgenes, ritmo vertical y grupos de controles. |
-| `ListView` | Muestra contenido desplazable y listas largas. | Menús, avisos y formulario. |
-| `Wrap` | Acomoda elementos en otra línea si falta ancho. | Precio y estado en el detalle; leyenda del radar. |
-| `Stack` y `Positioned` | Superponen elementos y ubican pines. | Radar ilustrativo. |
-| `LayoutBuilder` | Adapta posiciones al espacio disponible. | Tamaño y ubicación de pines del radar. |
-| `NavigationBar` | Cambia entre secciones principales. | Menús, radar y comunidad. |
+### 3.1 Menús
 
-**Reglas de layout aplicadas:** las listas reciben un espacio acotado mediante `Expanded`; los contenidos largos se desplazan con `ListView`; los chips se desplazan horizontalmente; el formulario usa validación y scroll; el radar usa medidas relativas en vez de coordenadas absolutas de pantalla.
+![Menús](capturas/01_lista.png)
 
-## 4. Flujo de navegación
+- **Encabezado:** `Row` con logo, título y contador de menús libres.
+- **Búsqueda y filtros:** `TextField` y una `ListView` horizontal de `FilterChip` con ícono.
+- **Tarjeta:** el banner con la ilustración ocupa la parte alta; el precio y el estado van sobre la imagen. Debajo: nombre, tres datos con ícono y los platos como chips tintados con el color de la cocina.
+- **Menú agotado:** la imagen se oscurece y aparece el sello "AGOTADO" (ver [captura](capturas/01c_agotado.png)).
 
 ```text
-Menús ──> Detalle ──> Avisar disponibilidad
-  │
-  └──────> Publicar menú ──> Menús
-
-Radar ──> Detalle
-Comunidad <── nuevos avisos de publicación o disponibilidad
+Scaffold
+└─ SafeArea
+   └─ IndexedStack
+      └─ ExploreTab · Column
+         ├─ Row (logo, título, pill de libres)
+         ├─ TextField
+         ├─ ListView horizontal · FilterChip
+         └─ Expanded
+            └─ ListView.separated
+               └─ MenuCard · Card
+                  └─ InkWell · Column
+                     ├─ Stack (Hero > FoodBanner, StatusBadge, precio)
+                     └─ Padding (nombre, Wrap de datos, Wrap de chips)
 ```
 
-## 5. Fuentes técnicas
+### 3.2 Detalle
+
+![Detalle](capturas/04_detalle.png)
+
+- **Cabecera:** `SliverAppBar` que se colapsa al desplazar. La ilustración viaja desde la tarjeta con un `Hero`.
+- **Datos clave:** tres fichas en `Row` con `Expanded` (minutos a pie, referencia, cocina).
+- **Menú del día:** una sola `Card` con tres filas (entrada, plato de fondo, bebida), cada una con un ícono tintado.
+- **Acción:** botón fijo en `bottomNavigationBar` para avisar disponibilidad.
+
+### 3.3 Radar
+
+| Sin selección | Con un local seleccionado |
+|:---:|:---:|
+| ![Radar](capturas/02_radar.png) | ![Radar con selección](capturas/02b_radar_seleccion.png) |
+
+- **Fondo:** `CustomPaint` con degradado radial, tres anillos rotulados en minutos (2, 4 y 6), ejes y un barrido animado con `SweepGradient` movido por un `AnimationController`.
+- **Distancia con significado:** cada pin se coloca a una distancia proporcional a sus minutos a pie. El ángulo viene de la posición ilustrativa del menú. Se deja un radio mínimo para no tapar el marcador del campus.
+- **Pines:** círculo del color del estado con el ícono de la cocina y el precio debajo. El seleccionado crece y brilla (`AnimatedScale`).
+- **Vista previa:** al tocar un pin aparece una tarjeta con la imagen del plato, que cambia con `AnimatedSwitcher`.
+
+### 3.4 Comunidad
+
+![Comunidad](capturas/03_comunidad.png)
+
+- **Cabecera:** `ClipPath` con un `CustomClipper` que recorta una onda, círculos translúcidos, una ilustración girada con `Transform.rotate` y un sticker amarillo inclinado.
+- **Burbujas:** alternan lado izquierdo y derecho. La esquina inferior del lado del avatar es casi recta, lo que da forma de globo de conversación.
+- **Imágenes:** una miniatura circular del plato (`ClipOval`) y un avatar con la inicial del autor y un ícono de estado.
+
+### 3.5 Publicar
+
+![Publicar](capturas/05_publicar.png)
+
+Formulario con `Form` y `TextFormField` validados. El tipo de cocina usa `DropdownButtonFormField` y la disponibilidad observada un `SegmentedButton`.
+
+## 4. Widgets de organización y layout investigados
+
+| Widget | Función | Dónde se usa |
+|---|---|---|
+| `MaterialApp`, `ThemeData` | Raíz, navegación y tema Material 3. | `main.dart`, `app_theme.dart` |
+| `Scaffold` | Estructura con cuerpo, navegación y botón flotante. | Todas las pantallas |
+| `SafeArea` | Evita barras y recortes del sistema. | Shell y detalle |
+| `Column`, `Row` | Ordenan en vertical y horizontal. | Encabezados, tarjetas, fichas |
+| `Expanded` | Reparte el espacio libre. | Lista, panel del radar, fichas |
+| `Padding`, `SizedBox` | Márgenes y separaciones. | Toda la app |
+| `Wrap` | Pasa a otra línea si falta ancho. | Datos y chips de la tarjeta, leyenda |
+| `ListView` | Contenido desplazable. | Menús, Comunidad, formulario |
+| `CustomScrollView`, `SliverAppBar` | Cabecera que se colapsa con el scroll. | Detalle |
+| `Stack`, `Positioned` | Superponen elementos y los ubican. | Banner de la tarjeta, radar, cabecera |
+| `LayoutBuilder` | Adapta posiciones al espacio recibido. | Radar y banner |
+| `IndexedStack` | Mantiene vivas las pestañas. | Shell |
+| `NavigationBar` | Navegación principal. | Shell |
+| `Hero` | Transición compartida entre pantallas. | Tarjeta a detalle |
+| `ClipRRect`, `ClipOval`, `ClipPath` | Recortan en formas. | Banner, miniaturas, onda |
+| `Transform.rotate` | Gira un widget. | Sellos y sticker |
+| `CustomPaint`, `CustomPainter` | Dibujo propio en un lienzo. | Ilustraciones y radar |
+| `AnimatedSwitcher`, `AnimatedScale` | Animaciones implícitas. | Vista previa y pines |
+
+**Reglas de layout aplicadas**
+- Las listas reciben altura acotada con `Expanded`.
+- El contenido largo se desplaza; los chips usan `Wrap` o scroll horizontal.
+- El radar usa medidas relativas al espacio disponible, no coordenadas fijas.
+- El contenido deja 100 px libres al final para que el botón flotante no tape el último elemento.
+
+## 5. Ilustraciones sin imágenes externas
+
+Los platos se dibujan con `CustomPainter` en un lienzo normalizado de 0 a 1 (`lib/widgets/food_art.dart`). Hay una ilustración por cocina: plato criollo, bowl vegetariano, bowl de chifa y una cloche genérica. Ventajas: no pesan, escalan sin perder calidad y no dependen de licencias. Se pueden reemplazar por fotos reales con `Image.asset` sin cambiar el resto del diseño.
+
+## 6. Flujo de navegación
+
+```mermaid
+flowchart LR
+    M[Menús] --> D[Detalle]
+    R[Radar] --> D
+    D --> A[Avisar disponibilidad]
+    M --> A
+    F["Botón Publicar menú"] --> P[Publicar]
+    P --> M
+    P -.nuevo aviso.-> C[Comunidad]
+    A -.nuevo aviso.-> C
+```
+
+## 7. Fuentes técnicas
 
 - Flutter, [Layouts in Flutter](https://docs.flutter.dev/ui/layout).
 - Flutter, [Layout widgets](https://docs.flutter.dev/ui/widgets/layout).
 - Flutter, [Understanding constraints](https://docs.flutter.dev/ui/layout/constraints).
 - Flutter, [Material components](https://docs.flutter.dev/ui/widgets/material).
+- Flutter, [CustomPaint](https://api.flutter.dev/flutter/widgets/CustomPaint-class.html) y [Hero animations](https://docs.flutter.dev/ui/animations/hero-animations).
 
-Documento temático de referencia: *MenúRadar: Aplicativo Móvil Universitario para la Gestión en Tiempo Real de Menús Estudiantiles* (PDF facilitado por el usuario).
+Documento temático de referencia: *MenúRadar: Aplicativo Móvil Universitario para la Gestión en Tiempo Real de Menús Estudiantiles* (PDF previo del equipo).

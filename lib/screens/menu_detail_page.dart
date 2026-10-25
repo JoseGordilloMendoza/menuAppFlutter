@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/menu_store.dart';
 import '../theme/app_theme.dart';
 import '../widgets/availability_sheet.dart';
+import '../widgets/food_art.dart';
 import '../widgets/status_badge.dart';
 
 class MenuDetailPage extends StatelessWidget {
@@ -11,66 +12,198 @@ class MenuDetailPage extends StatelessWidget {
   final MenuStore store;
   final String menuId;
 
+  static const double _expandedHeight = 280;
+
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: store,
     builder: (context, _) {
       final menu = store.findMenu(menuId);
+      final style = categoryStyle(menu.category);
+      final top = MediaQuery.paddingOf(context).top;
       return Scaffold(
-        appBar: AppBar(title: const Text('Detalle del menú')),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
-            children: [
-              Text(
-                menu.restaurant,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.navy,
-                  fontWeight: FontWeight.w900,
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              expandedHeight: _expandedHeight,
+              backgroundColor: style.bottom,
+              foregroundColor: Colors.white,
+              automaticallyImplyLeading: false,
+              leading: Padding(
+                padding: const EdgeInsets.all(6),
+                child: IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white.withAlpha(70),
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
-              const SizedBox(height: 6),
-              Text('${menu.area} · ${menu.walkMinutes} min a pie · ${menu.category}'),
-              const SizedBox(height: 16),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  Text(
-                    'S/ ${menu.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      color: AppColors.orange,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 28,
+              flexibleSpace: LayoutBuilder(
+                builder: (context, constraints) {
+                  final collapsed = kToolbarHeight + top;
+                  final t = ((constraints.maxHeight - collapsed) /
+                          (_expandedHeight + top - collapsed))
+                      .clamp(0.0, 1.0);
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Hero(
+                        tag: 'banner-${menu.id}',
+                        child: FoodBanner(category: menu.category),
+                      ),
+                      Positioned(
+                        top: top + 15,
+                        left: 64,
+                        right: 16,
+                        child: Opacity(
+                          opacity: 1 - t,
+                          child: Text(
+                            menu.restaurant,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: -1,
+                        child: Container(
+                          height: 28,
+                          decoration: const BoxDecoration(
+                            color: AppColors.cream,
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      menu.restaurant,
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: AppColors.navy,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
-                  StatusBadge(status: menu.availability),
-                ],
-              ),
-              const SizedBox(height: 24),
-              _DetailSection(title: 'Entradas', icon: Icons.soup_kitchen_outlined, items: menu.starters),
-              const SizedBox(height: 12),
-              _DetailSection(title: 'Platos de fondo', icon: Icons.restaurant_outlined, items: menu.mainDishes),
-              const SizedBox(height: 12),
-              _DetailSection(title: 'Bebida', icon: Icons.local_drink_outlined, items: [menu.drink]),
-              const SizedBox(height: 20),
-              const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'Información de demostración. Confirma precio y disponibilidad en el local antes de desplazarte.',
-                  ),
+                    const SizedBox(height: 6),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'S/ ${menu.price.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: AppColors.orange,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 30,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        StatusBadge(status: menu.availability),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _StatTile(
+                            icon: Icons.directions_walk_rounded,
+                            value: '${menu.walkMinutes} min',
+                            label: 'a pie',
+                            color: style.top,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _StatTile(
+                            icon: Icons.place_rounded,
+                            value: menu.area,
+                            label: 'referencia',
+                            color: style.top,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _StatTile(
+                            icon: categoryIcon(menu.category),
+                            value: menu.category,
+                            label: 'cocina',
+                            color: style.top,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Card(
+                      margin: EdgeInsets.zero,
+                      child: Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          children: [
+                            _CourseRow(
+                              icon: Icons.soup_kitchen_rounded,
+                              title: 'Entrada',
+                              items: menu.starters,
+                              color: style.top,
+                            ),
+                            const _Divider(),
+                            _CourseRow(
+                              icon: Icons.restaurant_rounded,
+                              title: 'Plato de fondo',
+                              items: menu.mainDishes,
+                              color: style.top,
+                            ),
+                            const _Divider(),
+                            _CourseRow(
+                              icon: Icons.local_drink_rounded,
+                              title: 'Bebida',
+                              items: [menu.drink],
+                              color: style.top,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, size: 16, color: Colors.black45),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Confirma precio y stock en el local.',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         bottomNavigationBar: SafeArea(
           minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
           child: FilledButton.icon(
             onPressed: () => reportAvailability(context, store, menu),
-            icon: const Icon(Icons.campaign_outlined),
+            icon: const Icon(Icons.campaign_rounded),
             label: const Text('Avisar disponibilidad'),
           ),
         ),
@@ -79,39 +212,104 @@ class MenuDetailPage extends StatelessWidget {
   );
 }
 
-class _DetailSection extends StatelessWidget {
-  const _DetailSection({
-    required this.title,
+class _StatTile extends StatelessWidget {
+  const _StatTile({
     required this.icon,
-    required this.items,
+    required this.value,
+    required this.label,
+    required this.color,
   });
 
-  final String title;
   final IconData icon;
-  final List<String> items;
+  final String value;
+  final String label;
+  final Color color;
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: AppColors.orange),
-              const SizedBox(width: 8),
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          for (final item in items)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 5),
-              child: Text('• $item'),
-            ),
-        ],
-      ),
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+    decoration: BoxDecoration(
+      color: color.withAlpha(30),
+      borderRadius: BorderRadius.circular(20),
     ),
+    child: Column(
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: AppColors.navy,
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+          ),
+        ),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    ),
+  );
+}
+
+class _CourseRow extends StatelessWidget {
+  const _CourseRow({
+    required this.icon,
+    required this.title,
+    required this.items,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String title;
+  final List<String> items;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        width: 46,
+        height: 46,
+        decoration: BoxDecoration(
+          color: color.withAlpha(32),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Icon(icon, color: color),
+      ),
+      const SizedBox(width: 14),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
+            const SizedBox(height: 4),
+            for (final item in items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text(
+                  item,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.navy,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+    padding: EdgeInsets.symmetric(vertical: 14),
+    child: Divider(height: 1),
   );
 }

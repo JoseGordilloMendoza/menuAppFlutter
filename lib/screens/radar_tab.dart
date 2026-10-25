@@ -71,8 +71,8 @@ class _RadarTabState extends State<RadarTab> with SingleTickerProviderStateMixin
                       Text(
                         'Radar',
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
                           color: AppColors.navy,
+                          fontSize: 32,
                         ),
                       ),
                       Text(
@@ -330,11 +330,7 @@ class _RadarPin extends StatelessWidget {
               ),
               child: Text(
                 'S/ ${menu.price.toStringAsFixed(0)}',
-                style: const TextStyle(
-                  color: AppColors.navy,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12,
-                ),
+                style: AppText.display(13),
               ),
             ),
           ],
@@ -427,11 +423,7 @@ class _PreviewCard extends StatelessWidget {
                     menu.restaurant,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.navy,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                    ),
+                    style: AppText.display(19),
                   ),
                   const SizedBox(height: 2),
                   Text(

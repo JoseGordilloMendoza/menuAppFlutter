@@ -45,14 +45,39 @@ class _PublishMenuPageState extends State<PublishMenuPage> {
       ? 'Completa este campo.'
       : null;
 
+  /// Elige el ángulo del radar más alejado de los pines que ya existen, para
+  /// que un menú nuevo no se encime con otro.
+  double _freeAngle(int walk) {
+    final mine = radarFraction(walk);
+    final taken = [
+      for (final menu in widget.store.menus)
+        Offset.fromDirection(
+          math.atan2(menu.positionY - 0.5, menu.positionX - 0.5),
+          radarFraction(menu.walkMinutes),
+        ),
+    ];
+    var best = 0.0;
+    var bestGap = -1.0;
+    for (var k = 0; k < 24; k++) {
+      final angle = k * math.pi / 12;
+      final point = Offset.fromDirection(angle, mine);
+      final gap = taken.isEmpty
+          ? 1.0
+          : taken.map((other) => (other - point).distance).reduce(math.min);
+      if (gap > bestGap) {
+        best = angle;
+        bestGap = gap;
+      }
+    }
+    return best;
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final price = double.parse(_price.text.trim().replaceAll(',', '.'));
     final walk = int.parse(_walk.text.trim());
     final id = DateTime.now().microsecondsSinceEpoch.toString();
-    // Cada menú nuevo recibe un ángulo distinto para que los pines del radar
-    // no se encimen.
-    final angle = widget.store.menus.length * 2.4;
+    final angle = _freeAngle(walk);
     widget.store.addMenu(
       CampusMenu(
         id: id,

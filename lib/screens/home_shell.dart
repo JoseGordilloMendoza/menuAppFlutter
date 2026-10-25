@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../data/menu_store.dart';
 import '../models/menu.dart';
 import '../widgets/availability_sheet.dart';
+import '../widgets/notice_composer.dart';
 import 'community_tab.dart';
 import 'explore_tab.dart';
 import 'menu_detail_page.dart';
@@ -43,6 +44,14 @@ class _HomeShellState extends State<HomeShell> {
     );
   }
 
+  Future<void> _newNotice() async {
+    final published = await showNoticeComposer(context, widget.store);
+    if (!published || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Aviso publicado en esta sesión.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     // Comunidad dibuja su cabecera hasta el borde superior de la pantalla,
@@ -69,9 +78,9 @@ class _HomeShellState extends State<HomeShell> {
       ),
     ),
     floatingActionButton: FloatingActionButton.extended(
-      onPressed: _publishMenu,
-      icon: const Icon(Icons.add_rounded),
-      label: const Text('Publicar menú'),
+      onPressed: _selectedIndex == 2 ? _newNotice : _publishMenu,
+      icon: Icon(_selectedIndex == 2 ? Icons.edit_note_rounded : Icons.add_rounded),
+      label: Text(_selectedIndex == 2 ? 'Nuevo aviso' : 'Publicar menú'),
     ),
     bottomNavigationBar: NavigationBar(
       selectedIndex: _selectedIndex,

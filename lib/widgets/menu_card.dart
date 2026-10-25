@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/menu.dart';
 import '../theme/app_theme.dart';
+import 'food_art.dart';
 import 'status_badge.dart';
 
 class MenuCard extends StatelessWidget {
@@ -18,76 +19,158 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = categoryStyle(menu.category);
+    final soldOut = menu.availability == MenuAvailability.soldOut;
     return Card(
+      clipBehavior: Clip.antiAlias,
       margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+      child: InkWell(
+        onTap: onOpen,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Stack(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        menu.restaurant,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.navy,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${menu.area} · ${menu.walkMinutes} min a pie · ${menu.category}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
+                Hero(
+                  tag: 'banner-${menu.id}',
+                  child: FoodBanner(category: menu.category, height: 156),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'S/ ${menu.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 17,
-                    color: AppColors.orange,
+                if (soldOut) const Positioned.fill(child: _SoldOutVeil()),
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: StatusBadge(status: menu.availability, solid: true),
+                ),
+                Positioned(
+                  left: 16,
+                  bottom: 12,
+                  child: Text(
+                    'S/ ${menu.price.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                      shadows: [Shadow(color: Color(0x55000000), blurRadius: 8)],
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            StatusBadge(status: menu.availability),
-            const SizedBox(height: 14),
-            Text('PLATOS DE FONDO', style: Theme.of(context).textTheme.labelSmall),
-            const SizedBox(height: 4),
-            Text(menu.mainDishes.join(' · '), maxLines: 2, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton.icon(
-                    onPressed: onOpen,
-                    icon: const Icon(Icons.menu_book_outlined, size: 18),
-                    label: const Text('Ver menu'),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          menu.restaurant,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.navy,
+                          ),
+                        ),
+                      ),
+                      IconButton.filledTonal(
+                        tooltip: 'Avisar stock',
+                        onPressed: onReport,
+                        icon: const Icon(Icons.campaign_rounded),
+                      ),
+                    ],
                   ),
-                ),
-                Expanded(
-                  child: TextButton.icon(
-                    onPressed: onReport,
-                    icon: const Icon(Icons.campaign_outlined, size: 18),
-                    label: const Text('Avisar stock'),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Wrap(
+                      spacing: 14,
+                      runSpacing: 6,
+                      children: [
+                        _Meta(icon: Icons.directions_walk_rounded, text: '${menu.walkMinutes} min'),
+                        _Meta(icon: Icons.place_outlined, text: menu.area),
+                        _Meta(icon: categoryIcon(menu.category), text: menu.category),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final dish in menu.mainDishes)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: style.top.withAlpha(30),
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Text(
+                              dish,
+                              style: TextStyle(
+                                color: style.bottom,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+class _Meta extends StatelessWidget {
+  const _Meta({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 16, color: Colors.black54),
+      const SizedBox(width: 4),
+      Text(text, style: Theme.of(context).textTheme.bodySmall),
+    ],
+  );
+}
+
+class _SoldOutVeil extends StatelessWidget {
+  const _SoldOutVeil();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    color: Colors.black.withAlpha(110),
+    alignment: Alignment.center,
+    child: Transform.rotate(
+      angle: -0.2,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.white, width: 3),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Text(
+          'AGOTADO',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 3,
+          ),
+        ),
+      ),
+    ),
+  );
 }

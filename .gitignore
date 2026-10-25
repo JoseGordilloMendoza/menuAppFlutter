@@ -11,3 +11,6 @@ coverage/
 .metadata
 .kilo/
 .claude/
+
+# Material del informe: se mantiene solo en local
+docs/

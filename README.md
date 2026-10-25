@@ -1,4 +1,4 @@
-# MenúRadar · Laboratorio de Flutter
+﻿# MenúRadar · Laboratorio de Flutter
 
 Prototipo móvil multiplataforma para encontrar menús económicos y disponibles cerca del campus antes de salir al receso. Las interfaces están construidas solo con widgets de Flutter y sin paquetes externos, con énfasis en **Android**.
 
@@ -73,5 +73,6 @@ docs/
 
 ## Documentación
 
+- **Informe del laboratorio:** [Word](docs/MenuRadar_Informe_Lab4.docx) · [PDF](docs/MenuRadar_Informe_Lab4.pdf)
 - [Árbol de problemas, diseño de interfaces y widgets de layout](docs/analisis_y_layout.md)
 - [Contexto del laboratorio](CONTEXTO_MENU_RADAR.md)
